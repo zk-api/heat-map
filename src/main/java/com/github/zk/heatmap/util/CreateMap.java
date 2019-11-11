@@ -128,7 +128,11 @@ public class CreateMap {
         }
 
         try {
-            ImageIO.write(bi, "png", new File(outPath));
+            Path path = Paths.get(outPath);
+            if (!Files.exists(path)) {
+                Files.createDirectories(path.getParent());
+            }
+            ImageIO.write(bi, "png", path.toFile());
         } catch (IOException e) {
             e.printStackTrace();
             return false;
