@@ -14,4 +14,5 @@
 1. 将数据组织成List\<HeatMapEntity\>格式；
 2. 调用createMap静态方法，传入相应参数即可（此类中自带一个main方法，针对文件格式的元数据做的示例）。
 生成效果如下图：
-[!image](https://github.com/zk-api/heat-map/blob/master/data/outpic/2.png)
+
+![image](https://github.com/zk185/spring-cloud-gateway/blob/master/images/spring_cloud_gateway_diagram.png)
