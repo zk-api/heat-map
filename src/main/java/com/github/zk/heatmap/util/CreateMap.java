@@ -19,6 +19,12 @@ import java.util.List;
  * @date 2019/8/2 9:28
  */
 public class CreateMap {
+
+    /**
+     * 初始化数值范围和颜色值对应关系
+     */
+    private static List<int[]> valueList = initValue();
+    private static List<Color>  colorList = initColor();
     /**
      * 使用读取文件方式示例
      *
@@ -53,6 +59,7 @@ public class CreateMap {
         }
     }
 
+
     /**
      * 生成热力图
      *
@@ -67,17 +74,13 @@ public class CreateMap {
         //初始化画板
         Graphics2D graphics = bi.createGraphics();
 
-        //初始化数值范围
-        List<int[]> initValue = initValue();
-        //初始化颜色范围
-        List<Color> initColor = initColor();
         //为每一个点查找颜色值
         for (HeatMapEntity entity : list) {
-            for (int i = 0; i < initValue.size(); i++) {
-                int start = initValue.get(i)[0];
-                int end = initValue.get(i)[1];
+            for (int i = 0; i < valueList.size(); i++) {
+                int start = valueList.get(i)[0];
+                int end = valueList.get(i)[1];
                 if (entity.getValue() >= start && entity.getValue() < end) {
-                    graphics.setColor(initColor.get(i));
+                    graphics.setColor(colorList.get(i));
                     int lat = (int) entity.getLat();
                     int lon = (int) entity.getLon();
                     //纬度90转换为0
