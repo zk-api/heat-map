@@ -32,7 +32,7 @@ public class CreateMap {
      */
     public static void main(String[] args) {
         List<HeatMapEntity> list = new ArrayList<>();
-        Path path = Paths.get("E:\\githubWork\\heat-map\\RLT\\BRDM00000_20183580000_01D_01S_BD2_JBDH.DOP");
+        Path path = Paths.get("E:\\githubWork\\RLT\\BRDM00000_20183580000_01D_01S_BD2_JBDH.DOP");
         try {
             Files.lines(path).filter(line -> {
                 boolean flag = false;
@@ -53,7 +53,7 @@ public class CreateMap {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        boolean b = creatHeatMap(list, "E:\\githubWork\\heat-map\\RLT\\dt-release.png", "E:\\githubWork\\heat-map\\2.png", 30);
+        boolean b = creatHeatMap(list, "E:\\githubWork\\RLT\\dt-release.png", "E:\\githubWork\\heatmapPic\\2.png");
         if (b) {
             System.out.println("成功");
         }
@@ -69,48 +69,19 @@ public class CreateMap {
      * @return
      */
     public static boolean creatHeatMap(List<HeatMapEntity> list, String backgroundPath, String outPath) {
-        //初始化图片缓冲区(width:3900 height:1970)
-        BufferedImage bi = new BufferedImage(3900, 1970, BufferedImage.TYPE_INT_ARGB);
-        //初始化画板
-        Graphics2D graphics = bi.createGraphics();
-
-        //为每一个点查找颜色值
-        for (HeatMapEntity entity : list) {
-            for (int i = 0; i < valueList.size(); i++) {
-                int start = valueList.get(i)[0];
-                int end = valueList.get(i)[1];
-                if (entity.getValue() >= start && entity.getValue() < end) {
-                    graphics.setColor(colorList.get(i));
-                    int lat = (int) entity.getLat();
-                    int lon = (int) entity.getLon();
-                    //纬度90转换为0
-                    lat -= 90;
-                    lat = Math.abs(lat);
-                    //经度-180转换为0·
-                    lon += 180;
-                    graphics.fillRect((lon * 10) + 145, (lat * 10) + 80, 10, 10);
-                    break;
-                }
-            }
-        }
-        //加载地图
-        if (backgroundPath != null && !"".equals(backgroundPath)) {
-            ImageIcon ii = new ImageIcon(backgroundPath);
-            //绘制地图
-            graphics.drawImage(ii.getImage(), 0, 0, 3900, 1970, null);
-        }
-
-        try {
-            ImageIO.write(bi, "png", new File(outPath));
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
-        bi.flush();
-        return true;
+        return creatHeatMap(list, backgroundPath, outPath, -180, 90);
     }
 
-    public static boolean creatHeatMap(List<HeatMapEntity> list, String backgroundPath, String outPath, int startLon) {
+    /**
+     * 根据经纬度位置生成热力图
+     * @param list              元数据
+     * @param backgroundPath    背景图
+     * @param outPath           输出路径
+     * @param startLon          经度开始值（带符号）
+     * @param startLon          纬度开始值（带符号）
+     * @return
+     */
+    public static boolean creatHeatMap(List<HeatMapEntity> list, String backgroundPath, String outPath, int startLon, int startLat) {
         //初始化图片缓冲区(width:3900 height:1970)
         BufferedImage bi = new BufferedImage(3900, 1970, BufferedImage.TYPE_INT_ARGB);
         //初始化画板
@@ -132,6 +103,11 @@ public class CreateMap {
                     //纬度90转换为0
                     lat -= 90;
                     lat = Math.abs(lat);
+                    //偏移startLat后，纬度坐标
+                    lat -= 90 - startLat;
+                    if (lat < 0) {
+                        lat += 180;
+                    }
                     //经度-180转换为0·
                     lon += 180;
                     //偏移startLon后，经度坐标
