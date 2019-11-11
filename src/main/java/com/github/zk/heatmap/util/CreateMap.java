@@ -17,6 +17,8 @@ import java.util.List;
 /**
  * @author zk
  * @date 2019/8/2 9:28
+ * @since v1.0.0
+ * @version v1.0.0
  */
 public class CreateMap {
 
@@ -30,6 +32,7 @@ public class CreateMap {
      * 使用读取文件方式示例
      *
      * @param args
+     * @since v1.0.0
      */
     public static void main(String[] args) {
         List<HeatMapEntity> list = new ArrayList<>();
@@ -54,12 +57,15 @@ public class CreateMap {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        boolean b = creatHeatMap(list, "E:\\githubWork\\heat-map\\data\\dt-release.png", "E:\\githubWork\\heat-map\\data\\outpic\\2.png");
+        boolean b = creatHeatMap(list, "E:\\githubWork\\heat-map\\data\\dt-release.png", "E:\\githubWork\\heat-map\\data\\outpic\\2.png", -150, 90);
         if (b) {
             System.out.println("成功");
         }
     }
 
+    public static boolean creatHeatMap(List<HeatMapEntity> list, String outPath) {
+        return creatHeatMap(list, null, outPath, -180, 90);
+    }
 
     /**
      * 生成热力图
@@ -68,6 +74,7 @@ public class CreateMap {
      * @param backgroundPath 背景图
      * @param outPath        输出路径
      * @return
+     * @since v1.0.0
      */
     public static boolean creatHeatMap(List<HeatMapEntity> list, String backgroundPath, String outPath) {
         return creatHeatMap(list, backgroundPath, outPath, -180, 90);
@@ -82,6 +89,7 @@ public class CreateMap {
      * @param startLon       经度开始值（带符号）
      * @param startLon       纬度开始值（带符号）
      * @return
+     * @since v1.0.0
      */
     public static boolean creatHeatMap(List<HeatMapEntity> list, String backgroundPath, String outPath, int startLon, int startLat) {
         //初始化图片缓冲区(width:3900 height:1970)
@@ -143,6 +151,11 @@ public class CreateMap {
         return true;
     }
 
+    /**
+     * 初始化数值范围
+     * @return
+     * @since v1.0.0
+     */
     private static List<int[]> initValue() {
         List<int[]> list = new ArrayList<>(9);
         list.add(new int[]{0, 1});
@@ -157,6 +170,11 @@ public class CreateMap {
         return list;
     }
 
+    /**
+     * 初始化颜色范围
+     * @return
+     * @since v1.0.0
+     */
     private static List<Color> initColor() {
         List<Color> list = new ArrayList<>(9);
         list.add(new Color(0, 0, 220, 255));
