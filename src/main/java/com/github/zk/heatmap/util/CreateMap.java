@@ -24,7 +24,8 @@ public class CreateMap {
      * 初始化数值范围和颜色值对应关系
      */
     private static List<int[]> valueList = initValue();
-    private static List<Color>  colorList = initColor();
+    private static List<Color> colorList = initColor();
+
     /**
      * 使用读取文件方式示例
      *
@@ -32,7 +33,7 @@ public class CreateMap {
      */
     public static void main(String[] args) {
         List<HeatMapEntity> list = new ArrayList<>();
-        Path path = Paths.get("E:\\githubWork\\RLT\\BRDM00000_20183580000_01D_01S_BD2_JBDH.DOP");
+        Path path = Paths.get("E:\\githubWork\\heat-map\\data\\dop.DOP");
         try {
             Files.lines(path).filter(line -> {
                 boolean flag = false;
@@ -53,7 +54,7 @@ public class CreateMap {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        boolean b = creatHeatMap(list, "E:\\githubWork\\RLT\\dt-release.png", "E:\\githubWork\\heatmapPic\\2.png");
+        boolean b = creatHeatMap(list, "E:\\githubWork\\heat-map\\data\\dt-release.png", "E:\\githubWork\\heat-map\\data\\outpic\\2.png");
         if (b) {
             System.out.println("成功");
         }
@@ -74,11 +75,12 @@ public class CreateMap {
 
     /**
      * 根据经纬度位置生成热力图
-     * @param list              元数据
-     * @param backgroundPath    背景图
-     * @param outPath           输出路径
-     * @param startLon          经度开始值（带符号）
-     * @param startLon          纬度开始值（带符号）
+     *
+     * @param list           元数据
+     * @param backgroundPath 背景图
+     * @param outPath        输出路径
+     * @param startLon       经度开始值（带符号）
+     * @param startLon       纬度开始值（带符号）
      * @return
      */
     public static boolean creatHeatMap(List<HeatMapEntity> list, String backgroundPath, String outPath, int startLon, int startLat) {
