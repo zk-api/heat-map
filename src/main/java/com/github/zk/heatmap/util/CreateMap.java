@@ -68,6 +68,17 @@ public class CreateMap {
     }
 
     /**
+     * 生成默认位置默认颜色带背景的热力图
+     * @param list
+     * @param backgroundPath
+     * @param outPath
+     * @return
+     */
+    public static boolean creatHeatMap(List<HeatMapEntity> list, String backgroundPath, String outPath) {
+        return creatHeatMap(list, backgroundPath, outPath, null, null, -180, 90);
+    }
+
+    /**
      * 生成自定义位置和自定义颜色带背景的热力图
      *
      * @param list           元数据
