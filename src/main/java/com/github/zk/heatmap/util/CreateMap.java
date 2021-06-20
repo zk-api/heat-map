@@ -7,6 +7,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -70,60 +71,73 @@ public class CreateMap {
      * @return
      */
     public static boolean creatHeatMap(List<HeatMapEntity> list, String outPath) {
-        return creatHeatMap(list, null, outPath, null, null, -180, 90);
+        return creatHeatMap(list, null, outPath, null, null,
+                -180, 90);
     }
 
     /**
      * 使用默认范围和默认颜色、默认开始位置生成带背景地图的热力图
-     * @param list 元数据
+     *
+     * @param list           元数据
      * @param backgroundPath 背景地图路径
-     * @param outPath 输出路径
+     * @param outPath        输出路径
      * @return
      */
-    public static boolean createHeatMapByBackground(List<HeatMapEntity> list, String backgroundPath, String outPath) {
-        return createHeatMapByBackground(list, backgroundPath, outPath, null, null, -180, 90);
+    public static boolean createHeatMapByBackground(List<HeatMapEntity> list, String backgroundPath,
+                                                    String outPath) {
+        return createHeatMapByBackground(list, backgroundPath, outPath,
+                null, null, -180, 90);
     }
+
     /**
      * 使用默认范围和默认颜色生成带背景地图的热力图
-     * @param list 元数据
+     *
+     * @param list           元数据
      * @param backgroundPath 背景地图路径
-     * @param outPath 输出路径
-     * @param startLon 开始经度
-     * @param startLat 开始纬度
+     * @param outPath        输出路径
+     * @param startLon       开始经度
+     * @param startLat       开始纬度
      * @return
      */
-    public static boolean createHeatMapByBackground(List<HeatMapEntity> list, String backgroundPath, String outPath, int startLon, int startLat) {
-        return createHeatMapByBackground(list, backgroundPath, outPath, null, null, startLon, startLat);
+    public static boolean createHeatMapByBackground(List<HeatMapEntity> list, String backgroundPath,
+                                                    String outPath, int startLon, int startLat) {
+        return createHeatMapByBackground(list, backgroundPath, outPath,
+                null, null, startLon, startLat);
     }
+
     /**
-     *
-     * @param list 元数据
+     * @param list           元数据
      * @param backgroundPath 背景地图路径
-     * @param outPath 输出路径
-     * @param values 数值范围
-     * @param colors 颜色范围
-     * @param startLon 开始经度
-     * @param startLat 开始纬度
+     * @param outPath        输出路径
+     * @param values         数值范围
+     * @param colors         颜色范围
+     * @param startLon       开始经度
+     * @param startLat       开始纬度
      * @return
      */
     public static boolean createHeatMapByBackground(List<HeatMapEntity> list, String backgroundPath, String outPath,
-                                                    List<int[]> values, List<Color> colors, int startLon, int startLat) {
+                                                    List<double[]> values, List<Color> colors,
+                                                    int startLon, int startLat) {
         //初始化图片缓冲区(width:3900 height:1970)
         BufferedImage bi = new BufferedImage(3900, 1970, BufferedImage.TYPE_INT_ARGB);
         //初始化画板
         Graphics2D graphics = bi.createGraphics();
 
         //初始化数值范围
-        List<int[]> initValue = (values == null ? defaultValue() : values);
+        List<double[]> initValue = (values == null ? defaultValue() : values);
 
         //初始化颜色范围
         List<Color> initColor = (colors == null ? defaultColor() : colors);
         //为每一个点查找颜色值
         for (HeatMapEntity entity : list) {
             for (int i = 0; i < initValue.size(); i++) {
-                int start = initValue.get(i)[0];
-                int end = initValue.get(i)[1];
-                if (entity.getValue() >= start && entity.getValue() < end) {
+                double start = initValue.get(i)[0];
+                double end = initValue.get(i)[1];
+                BigDecimal startBigDecimal = BigDecimal.valueOf(start);
+                BigDecimal endBigDecimal = BigDecimal.valueOf(end);
+                BigDecimal valueBigDecimal = BigDecimal.valueOf(entity.getValue());
+                if (valueBigDecimal.compareTo(startBigDecimal) >= 0 &&
+                        valueBigDecimal.compareTo(endBigDecimal) < 0) {
                     graphics.setColor(initColor.get(i));
                     int lat = (int) entity.getLat();
                     int lon = (int) entity.getLon();
@@ -178,12 +192,22 @@ public class CreateMap {
      */
     public static boolean creatHeatMap(List<HeatMapEntity> list, String backgroundPath, String outPath) {
         if (backgroundPath != null) {
-            return creatHeatMap(list, backgroundPath, outPath, null, null, -180, 90);
+            return creatHeatMap(list, backgroundPath, outPath, null, null,
+                    -180, 90);
         } else {
             return creatHeatMap(list, outPath);
         }
     }
 
+    /**
+     * 生成默认色值，无背景，可变像素热力图
+     *
+     * @param list    数据
+     * @param outPath 输出位置
+     * @param width   经度步长
+     * @param height  纬度步长
+     * @return
+     */
     public static boolean creatHeatMap(List<HeatMapEntity> list, String outPath, Double width, Double height) {
         //初始化图片缓冲区
         BufferedImage bi = new BufferedImage(3600, 1800, BufferedImage.TYPE_INT_ARGB);
@@ -191,16 +215,20 @@ public class CreateMap {
         Graphics2D graphics = bi.createGraphics();
 
         //初始化数值范围
-        List<int[]> initValue = defaultValue();
+        List<double[]> initValue = defaultValue();
 
         //初始化颜色范围
         List<Color> initColor = defaultColor();
         //为每一个点查找颜色值
         for (HeatMapEntity entity : list) {
             for (int i = 0; i < initValue.size(); i++) {
-                int start = initValue.get(i)[0];
-                int end = initValue.get(i)[1];
-                if (entity.getValue() >= start && entity.getValue() < end) {
+                double start = initValue.get(i)[0];
+                double end = initValue.get(i)[1];
+                BigDecimal startBigDecimal = BigDecimal.valueOf(start);
+                BigDecimal endBigDecimal = BigDecimal.valueOf(end);
+                BigDecimal valueBigDecimal = BigDecimal.valueOf(entity.getValue());
+                if (valueBigDecimal.compareTo(startBigDecimal) >= 0 &&
+                        valueBigDecimal.compareTo(endBigDecimal) < 0) {
                     graphics.setColor(initColor.get(i));
                     double lat = entity.getLat();
                     double lon = entity.getLon();
@@ -215,7 +243,75 @@ public class CreateMap {
                     if (lon < 0) {
                         lon += 360;
                     }
-                    graphics.fillRect((int) (lon * 10), (int) (lat * 10), (int) (10 * width), (int) (10 * height));
+                    graphics.fillRect((int) (lon * 10), (int) (lat * 10),
+                            (int) (10 * width), (int) (10 * height));
+                    break;
+                }
+            }
+        }
+
+        try {
+            Path path = Paths.get(outPath);
+            if (!Files.exists(path)) {
+                Files.createDirectories(path.getParent());
+            }
+            ImageIO.write(bi, "png", path.toFile());
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+        bi.flush();
+        return true;
+    }
+
+    /**
+     * 生成自定义数值和色值，无背景，可变像素热力图
+     *
+     * @param list    数据
+     * @param outPath 输出位置
+     * @param width   经度步长
+     * @param height  纬度步长
+     * @param values  数值范围
+     * @return
+     */
+    public static boolean creatHeatMap(List<HeatMapEntity> list, String outPath, Double width, Double height,
+                                       List<double[]> values, List<Color> colors) {
+        //初始化图片缓冲区
+        BufferedImage bi = new BufferedImage(3600, 1800, BufferedImage.TYPE_INT_ARGB);
+        //初始化画板
+        Graphics2D graphics = bi.createGraphics();
+
+        //初始化数值范围
+        List<double[]> initValue = (values == null ? defaultValue() : values);
+
+        //初始化颜色范围
+        List<Color> initColor = (colors == null ? defaultColor() : colors);
+        //为每一个点查找颜色值
+        for (HeatMapEntity entity : list) {
+            for (int i = 0; i < initValue.size(); i++) {
+                double start = initValue.get(i)[0];
+                double end = initValue.get(i)[1];
+                BigDecimal startBigDecimal = BigDecimal.valueOf(start);
+                BigDecimal endBigDecimal = BigDecimal.valueOf(end);
+                BigDecimal valueBigDecimal = BigDecimal.valueOf(entity.getValue());
+                if (valueBigDecimal.compareTo(startBigDecimal) >= 0 &&
+                        valueBigDecimal.compareTo(endBigDecimal) < 0) {
+                    graphics.setColor(initColor.get(i));
+                    double lat = entity.getLat();
+                    double lon = entity.getLon();
+                    //纬度90转换为0
+                    lat -= 90;
+                    lat = Math.abs(lat);
+                    if (lat < 0) {
+                        lat += 180;
+                    }
+                    //经度-180转换为0·
+                    lon += 180;
+                    if (lon < 0) {
+                        lon += 360;
+                    }
+                    graphics.fillRect((int) (lon * 10), (int) (lat * 10),
+                            (int) (10 * width), (int) (10 * height));
                     break;
                 }
             }
@@ -246,23 +342,28 @@ public class CreateMap {
      * @return
      * @since v1.0.0
      */
-    public static boolean creatHeatMap(List<HeatMapEntity> list, String backgroundPath, String outPath, List<int[]> values, List<Color> colors, int startLon, int startLat) {
+    public static boolean creatHeatMap(List<HeatMapEntity> list, String backgroundPath, String outPath,
+                                       List<double[]> values, List<Color> colors, int startLon, int startLat) {
         //初始化图片缓冲区(width:3900 height:1970)
         BufferedImage bi = new BufferedImage(3900, 1970, BufferedImage.TYPE_INT_ARGB);
         //初始化画板
         Graphics2D graphics = bi.createGraphics();
 
         //初始化数值范围
-        List<int[]> initValue = (values == null ? defaultValue() : values);
+        List<double[]> initValue = (values == null ? defaultValue() : values);
 
         //初始化颜色范围
         List<Color> initColor = (colors == null ? defaultColor() : colors);
         //为每一个点查找颜色值
         for (HeatMapEntity entity : list) {
             for (int i = 0; i < initValue.size(); i++) {
-                int start = initValue.get(i)[0];
-                int end = initValue.get(i)[1];
-                if (entity.getValue() >= start && entity.getValue() < end) {
+                double start = initValue.get(i)[0];
+                double end = initValue.get(i)[1];
+                BigDecimal startBigDecimal = BigDecimal.valueOf(start);
+                BigDecimal endBigDecimal = BigDecimal.valueOf(end);
+                BigDecimal valueBigDecimal = BigDecimal.valueOf(entity.getValue());
+                if (valueBigDecimal.compareTo(startBigDecimal) >= 0 &&
+                        valueBigDecimal.compareTo(endBigDecimal) < 0) {
                     graphics.setColor(initColor.get(i));
                     int lat = (int) entity.getLat();
                     int lon = (int) entity.getLon();
@@ -313,17 +414,17 @@ public class CreateMap {
      * @return
      * @since v2.0.0
      */
-    private static List<int[]> defaultValue() {
-        List<int[]> list = new ArrayList<>(9);
-        list.add(new int[]{0, 1});
-        list.add(new int[]{1, 2});
-        list.add(new int[]{2, 3});
-        list.add(new int[]{3, 4});
-        list.add(new int[]{4, 5});
-        list.add(new int[]{5, 6});
-        list.add(new int[]{6, 7});
-        list.add(new int[]{7, 8});
-        list.add(new int[]{8, 20});
+    private static List<double[]> defaultValue() {
+        List<double[]> list = new ArrayList<>(9);
+        list.add(new double[]{0d, 1d});
+        list.add(new double[]{1d, 2d});
+        list.add(new double[]{2d, 3d});
+        list.add(new double[]{3d, 4d});
+        list.add(new double[]{4d, 5d});
+        list.add(new double[]{5d, 6d});
+        list.add(new double[]{6d, 7d});
+        list.add(new double[]{7d, 8d});
+        list.add(new double[]{8d, 20d});
         return list;
     }
 
