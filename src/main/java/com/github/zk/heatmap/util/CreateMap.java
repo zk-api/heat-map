@@ -32,8 +32,8 @@ public class CreateMap {
      * @since v1.0.0
      */
     public static void main(String[] args) {
-//        dop();
-        dop1();
+        dop();
+//        dop1();
     }
 
     public static void dop() {
@@ -70,8 +70,11 @@ public class CreateMap {
         list1.add(new Color(0, 223, 255, 255));
         list1.add(new Color(255, 207, 0, 255));
         list1.add(new Color(255, 143, 0, 255));
-        boolean b = createHeatMapByBackground(list, "D:\\work\\workspace\\github\\heat-map\\data\\dt-release.png", "C:\\Users\\zhaokai\\Desktop\\rr_bds_pos_178_09.png",
+
+        List<HeatMapEntity> insertedList = interpolation(list, 4, 2);
+        boolean b = createHeatMapByBackground(insertedList, "D:\\work\\workspace\\github\\heat-map\\data\\dt-release.png", "C:\\Users\\zhaokai\\Desktop\\rr_bds_pos_178_09.png",
                 4.0d, 2.0d, list0, list1, -180, 90);
+
         if (b) {
             System.out.println("成功");
         }
@@ -128,7 +131,7 @@ public class CreateMap {
         list1.add(new Color(4, 99, 36, 255));
         list1.add(new Color(255, 255, 255, 255));
         boolean b = createHeatMapByBackground(list, "D:\\work\\workspace\\github\\heat-map\\data\\dt-release.png", "C:\\Users\\zhaokai\\Desktop\\0.png",
-                 list0, list1, -180, 90);
+                list0, list1, -180, 90);
         if (b) {
             System.out.println("成功");
         }
@@ -139,7 +142,7 @@ public class CreateMap {
         Path path = Paths.get("C:\\Users\\zhaokai\\Desktop\\t.txt");
         try {
             Iterator<String> iterator = Files.lines(path).iterator();
-            while(iterator.hasNext()) {
+            while (iterator.hasNext()) {
                 String firstLine = iterator.next();
                 //纬度
                 String lat = firstLine.substring(0, 8).trim();
@@ -449,8 +452,8 @@ public class CreateMap {
      * @since v1.0.0
      */
     public static boolean createHeatMapByBackground(List<HeatMapEntity> list, String backgroundPath, String outPath,
-                                       Double width, Double height,
-                                       List<double[]> values, List<Color> colors, int startLon, int startLat) {
+                                                    Double width, Double height,
+                                                    List<double[]> values, List<Color> colors, int startLon, int startLat) {
         //初始化图片缓冲区(width:3900 height:1970)
         BufferedImage bi = new BufferedImage(3900, 1970, BufferedImage.TYPE_INT_ARGB);
         //初始化画板
@@ -518,18 +521,19 @@ public class CreateMap {
 
     /**
      * 生成无背景，自定义像素、数值和色值、范围热力图
-     * @param list 数据集合
-     * @param outPath 输出图片地址
-     * @param width 像素宽
-     * @param height 像素高
-     * @param values 数值
-     * @param colors 色值
+     *
+     * @param list     数据集合
+     * @param outPath  输出图片地址
+     * @param width    像素宽
+     * @param height   像素高
+     * @param values   数值
+     * @param colors   色值
      * @param startLon 图片开始精度
      * @param startLat 图片开始纬度
      * @return
      */
     public static boolean createHeatMap(List<HeatMapEntity> list, String outPath, Double width, Double height,
-                                       List<double[]> values, List<Color> colors,  int startLon, int startLat) {
+                                        List<double[]> values, List<Color> colors, int startLon, int startLat) {
         //初始化图片缓冲区
         BufferedImage bi = new BufferedImage(3600, 1800, BufferedImage.TYPE_INT_ARGB);
         //初始化画板
@@ -587,6 +591,176 @@ public class CreateMap {
         }
         bi.flush();
         return true;
+    }
+
+    private static List<HeatMapEntity> interpolation(List<HeatMapEntity> list, int width, int height) {
+        int startLon = -180;
+        int startLat = 90;
+        return insertedValue(list, width, height, startLon, startLat);
+    }
+
+    /**
+     * 插值
+     * 按经度进行插值
+     *
+     * @param list     待插值数据
+     * @param startLon 开始经度
+     * @param startLat 开始纬度
+     * @return 插值后的数据
+     */
+    private static List<HeatMapEntity> insertedValue(List<HeatMapEntity> list, int width, int height, int startLon, int startLat) {
+        // 4 个点进行插值
+        List<int[]> points = new ArrayList<>(4);
+        // 下一次起始点
+        int newStartLon = startLon + width;
+        int newStartLat = startLat;
+        // 右下点
+        int rightLon = startLon + width;
+        int rightLat = startLat - height;
+
+        // 如果最后一个点经度为180，需要换行插值
+        if (newStartLon >= 180) {
+            newStartLon = -180;
+            newStartLat = startLat - height;
+        }
+
+        points.add(new int[]{startLon, startLat});
+        points.add(new int[]{rightLon, startLat});
+        points.add(new int[]{startLon, rightLat});
+        points.add(new int[]{rightLon, rightLat});
+
+        // 查找数据
+        List<HeatMapEntity> collect = list.stream().filter(heatMapEntity -> {
+            for (int[] point : points) {
+                if (point[0] == (int) heatMapEntity.getLon() &&
+                        point[1] == (int) heatMapEntity.getLat()) {
+                    return true;
+                }
+            }
+            return false;
+        }).collect(Collectors.toList());
+
+        List<HeatMapEntity> insertList = insertList(collect, points, width, height);
+        // 四角点值插入
+        insertList.addAll(collect);
+        // 最后一个矩阵，不需要再查找下一个矩阵
+        if (!(rightLon == 180 && rightLat == -90)) {
+            List<HeatMapEntity> nextInsertList = insertedValue(list, width, height, newStartLon, newStartLat);
+            insertList.removeAll(nextInsertList);
+            insertList.addAll(nextInsertList);
+        }
+        return insertList;
+    }
+
+    /**
+     * 对矩阵进行插值
+     *
+     * @param collect 待插值集合
+     * @param points  四角点集合
+     * @param width   像素宽
+     * @param height  像素高
+     * @return 插值后集合
+     */
+    private static List<HeatMapEntity> insertList(List<HeatMapEntity> collect, List<int[]> points,
+                                           int width, int height) {
+        List<HeatMapEntity> insertedList = new ArrayList<>();
+        // 第一行和最后一行先插值
+        // 第一行首尾值
+        double[] line1Value = new double[2];
+        // 最后一行首尾值
+        double[] line2Value = new double[2];
+        List<double[]> lineValue = new ArrayList<>();
+        lineValue.add(line1Value);
+        lineValue.add(line2Value);
+
+        for (int i = 0; i < points.size(); i++) {
+            for (HeatMapEntity heatMapEntity : collect) {
+                if (heatMapEntity.getLon() == points.get(i)[0] &&
+                        heatMapEntity.getLat() == points.get(i)[1]) {
+                    double value = heatMapEntity.getValue();
+                    if (i < 2) {
+                        line1Value[i] = value;
+                    } else {
+                        line2Value[i - 2] = value;
+                    }
+                }
+            }
+        }
+
+        /**
+         * 开始插值第一行和最后一行
+         */
+        // =============================
+        // 将四角点位值，赋值给新的两行数据
+        double[] insertedLine1Value = new double[width + 1];
+        insertedLine1Value[0] = line1Value[0];
+        insertedLine1Value[insertedLine1Value.length - 1] = line1Value[1];
+        double[] insertedLine2Value = new double[width + 1];
+        insertedLine2Value[0] = line2Value[0];
+        insertedLine2Value[insertedLine2Value.length - 1] = line2Value[1];
+        //将数组放入集合，方便后续循环通用
+        List<double[]> insertedLineValue = new ArrayList<>();
+        insertedLineValue.add(insertedLine1Value);
+        insertedLineValue.add(insertedLine2Value);
+
+        for (int i = 0; i < lineValue.size(); i++) {
+            double[] value = lineValue.get(i);
+            // 计算应该递增的平均值
+            double aveValue = (value[1] - value[0]) / width;
+            aveValue = new BigDecimal(aveValue)
+                    .setScale(2, BigDecimal.ROUND_HALF_EVEN)
+                    .doubleValue();
+            // 两行数据插值
+            for (int j = 0; j < width - 1; j++) {
+
+                HeatMapEntity heatMapEntity = new HeatMapEntity();
+                // 基于基准点第一个点（左上）进行增加
+                int lon = points.get(0)[0];
+                int lat = points.get(0)[1];
+                // 按行插值，根据行数计算经度
+                lon += j + 1;
+                lat -= i * height;
+                double insertedValue = value[0] + aveValue;
+                //插值后的两行数据
+                insertedLineValue.get(i)[j + 1] = insertedValue;
+
+                heatMapEntity.setLon(lon);
+                heatMapEntity.setLat(lat);
+                heatMapEntity.setValue(insertedValue);
+                insertedList.add(heatMapEntity);
+            }
+        }
+        // =============================
+        // 高度小于2时， 证明不需要插值
+        if (height < 2) {
+            return insertedList;
+        }
+
+        /**
+         * 开始插值列
+         */
+        for (int i = 0; i < width + 1; i++) {
+            double aveValue = (insertedLine2Value[i] - insertedLine1Value[i]) / height;
+            aveValue = new BigDecimal(aveValue)
+                    .setScale(2, BigDecimal.ROUND_HALF_EVEN)
+                    .doubleValue();
+            for (int j = 0; j < height - 1; j++) {
+                HeatMapEntity heatMapEntity = new HeatMapEntity();
+                // 基于基准点第一个点进行增加
+                int lon = points.get(0)[0];
+                int lat = points.get(0)[1];
+                // 按列插值，根据列数，计算经纬度
+                lon += i;
+                lat -= j + 1;
+                double insertedValue = insertedLine1Value[i] + aveValue;
+
+                heatMapEntity.setLon(lon);
+                heatMapEntity.setLat(lat);
+                heatMapEntity.setValue(insertedValue);
+                insertedList.add(heatMapEntity);
+            }
+        }
+        return insertedList;
     }
 
     /**
