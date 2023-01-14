@@ -820,7 +820,6 @@ public class CreateMap {
 
         List<HeatMapEntity> allList = new ArrayList<>();
 
-        List<Thread> threads = new ArrayList<>();
         for (int i = 0; i < 360 * 180; i++) {
             // 右下点
             int rightLon = startLon + width;

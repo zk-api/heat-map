@@ -21,10 +21,15 @@ import java.util.List;
 public class DrawExample {
     public static void main(String[] args) {
 //        defaultDraw();
-        System.out.println(pixelDraw());
+//        System.out.println(pixelDraw());
+        defaultBackgroundDraw();
     }
 
-    public static List<HeatMapEntity> buildHeatMapEntities() {
+    public static List<HeatMapEntity> buildHeatMapEntities(BigDecimal width, BigDecimal height) {
+        if (width.compareTo(new BigDecimal("0")) <= 0 ||
+                height.compareTo(new BigDecimal("0")) <= 0) {
+            throw new RuntimeException("经纬度间隔必须为正数");
+        }
         List<HeatMapEntity> list = new ArrayList<>();
         Path path = Paths.get("D:\\work\\workspace\\github\\heat-map\\data\\dop.DOP");
         try {
@@ -34,8 +39,14 @@ public class DrawExample {
                 if ("--".equals(colums[4])) {
                     return;
                 }
-                double lat = Double.parseDouble(colums[1]);
-                double lon = Double.parseDouble(colums[2]);
+                BigDecimal latBigDecimal = new BigDecimal(colums[1]).stripTrailingZeros();
+                BigDecimal lonBigDecimal = new BigDecimal(colums[2]).stripTrailingZeros();
+                if (Math.max(0, latBigDecimal.divide(width).stripTrailingZeros().scale()) > 0 ||
+                        Math.max(0, lonBigDecimal.divide(height).stripTrailingZeros().scale()) > 0) {
+                    return;
+                }
+                double lat = latBigDecimal.doubleValue();
+                double lon = lonBigDecimal.doubleValue();
                 double val = Double.parseDouble(colums[4]);
                 heatMapEntity.setLat(lat);
                 heatMapEntity.setLon(lon);
@@ -55,17 +66,31 @@ public class DrawExample {
      */
     public static List<Legend> defaultDraw() {
         IDrawProcessor drawProcessor = new DrawProcessorImpl.DrawProcessorBuilder().build();
-        List<HeatMapEntity> heatMapEntities = buildHeatMapEntities();
+        List<HeatMapEntity> heatMapEntities = buildHeatMapEntities(new BigDecimal("1"),
+                new BigDecimal("1"));
         String filePath = "D:\\work\\workspace\\github\\heat-map\\data\\outpic\\1.png";
         return drawProcessor.drawImg(heatMapEntities, filePath);
     }
 
     public static List<Legend> pixelDraw() {
         IDrawProcessor drawProcessor = new DrawProcessorImpl.DrawProcessorBuilder()
-                .pixel(new BigDecimal("5"), new BigDecimal("2.5"))
+                .pixel(new BigDecimal("1"), new BigDecimal("1"))
                 .build();
-        List<HeatMapEntity> heatMapEntities = buildHeatMapEntities();
-        String filePath = "D:\\work\\workspace\\github\\heat-map\\data\\outpic\\1.png";
-        return drawProcessor.drawImg(heatMapEntities, filePath);
+        List<HeatMapEntity> heatMapEntities = buildHeatMapEntities(new BigDecimal("5"),
+                new BigDecimal("5"));
+        List<HeatMapEntity> interpolation = drawProcessor.interpolation(heatMapEntities, 5, 5);
+        String filePath = "D:\\work\\workspace\\github\\heat-map\\data\\outpic\\1-1.png";
+        return drawProcessor.drawImg(interpolation, filePath);
+    }
+
+    public static List<Legend> defaultBackgroundDraw() {
+        IDrawProcessor drawProcessor = new DrawProcessorImpl.DrawProcessorBuilder()
+                .pixel(new BigDecimal("1"), new BigDecimal("1"))
+                .build();
+        List<HeatMapEntity> heatMapEntities = buildHeatMapEntities(new BigDecimal("1"),
+                new BigDecimal("1"));
+        String filePath = "D:\\work\\workspace\\github\\heat-map\\data\\outpic\\1-3.png";
+        String backgroundPath = "D:\\work\\workspace\\github\\heat-map\\data\\dt-release.png";
+        return drawProcessor.drawImgBackground(heatMapEntities, backgroundPath, filePath);
     }
 }

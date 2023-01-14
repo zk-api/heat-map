@@ -28,6 +28,16 @@ public interface IDrawProcessor {
      * @param background 输出路径
      * @return 是否生成成功
      */
-    boolean drawImgBackground(List<HeatMapEntity> list, String background, String outPath);
+    List<Legend> drawImgBackground(List<HeatMapEntity> list, String background, String outPath);
+
+    /**
+     * 数据插值
+     *
+     * @param sourceList 原始数据
+     * @param width 要插值的像素宽度
+     * @param height 要插值的像素高度
+     * @return 插值后数据
+     */
+    List<HeatMapEntity> interpolation(List<HeatMapEntity> sourceList, int width, int height);
 
 }
