@@ -4,7 +4,7 @@ import java.util.Objects;
 
 /**
  * @author zk
- * @date 2019/8/2 9:29
+ * @since 1.0
  */
 public class HeatMapEntity {
     private double lat;

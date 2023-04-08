@@ -2,12 +2,11 @@ package com.github.zk.heatmap.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 /**
  * @author zk
- * @date 2019/8/6 13:53
+ * @since 1.0
  * 计算多个多变行重合部分相交点坐标
  */
 public class CoincidenceUtil {
@@ -15,7 +14,7 @@ public class CoincidenceUtil {
      * 计算两条线交点的坐标
      * @param line1 new Double[][]{{x1,y1},{x2,y2}}
      * @param line2 new Double[][]{{x3,y3},{x4,y4}}
-     * @return
+     * @return 相交点
      */
     public static Double[] getIntersection(Double[][] line1, Double[][] line2) {
         Double[] intersection = new Double[2];
@@ -36,9 +35,9 @@ public class CoincidenceUtil {
 
     /**
      * 计算两个面的交点坐标
-     * @param plane1
-     * @param plane2
-     * @return
+     * @param plane1 第一个面
+     * @param plane2 第二个面
+     * @return 交点
      */
     public static List<Double[]> getPlaneIntersection(Double[][] plane1, Double[][] plane2) {
         //初始化交点数组

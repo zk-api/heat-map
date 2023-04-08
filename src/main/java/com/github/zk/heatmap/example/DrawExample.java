@@ -17,12 +17,13 @@ import java.util.List;
  *
  * @author zk
  * @date 2022/12/14 9:34
+ * @since  2.0
  */
 public class DrawExample {
     public static void main(String[] args) {
 //        defaultDraw();
-//        System.out.println(pixelDraw());
-        defaultBackgroundDraw();
+        System.out.println(pixelDraw());
+//        defaultBackgroundDraw();
     }
 
     public static List<HeatMapEntity> buildHeatMapEntities(BigDecimal width, BigDecimal height) {
@@ -79,7 +80,7 @@ public class DrawExample {
         List<HeatMapEntity> heatMapEntities = buildHeatMapEntities(new BigDecimal("5"),
                 new BigDecimal("5"));
         List<HeatMapEntity> interpolation = drawProcessor.interpolation(heatMapEntities, 5, 5);
-        String filePath = "D:\\work\\workspace\\github\\heat-map\\data\\outpic\\1-1.png";
+        String filePath = "D:\\work\\workspace\\github\\heat-map\\data\\outpic\\1-2.png";
         return drawProcessor.drawImg(interpolation, filePath);
     }
 

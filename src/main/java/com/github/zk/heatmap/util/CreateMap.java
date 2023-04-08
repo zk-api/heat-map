@@ -19,7 +19,6 @@ import javax.swing.*;
 /**
  * @author zk
  * @version v1.0.0
- * @date 2019/8/2 9:28
  * @since v1.0.0
  * @see com.github.zk.heatmap.draw.IDrawProcessor
  */
@@ -29,7 +28,7 @@ public class CreateMap {
     /**
      * 使用读取文件方式示例
      *
-     * @param args
+     * @param args 测试参数
      * @since v1.0.0
      */
     public static void main(String[] args) {
@@ -464,7 +463,8 @@ public class CreateMap {
      * @param width   经度步长
      * @param height  纬度步长
      * @param values  数值范围
-     * @return
+     * @param colors 颜色值
+     * @return 是否成功
      */
     public static boolean createHeatMap(List<HeatMapEntity> list, String outPath, Double width, Double height,
                                         List<double[]> values, List<Color> colors) {
@@ -588,7 +588,11 @@ public class CreateMap {
      * @param outPath        输出路径
      * @param startLon       经度开始值（带符号）
      * @param startLat       纬度开始值（带符号）
-     * @return
+     * @param width 像素宽
+     * @param height 像素高
+     * @param values 值范围
+     * @param colors 颜色值
+     * @return 是否成功
      * @since v1.0.0
      */
     public static boolean createHeatMapByBackground(List<HeatMapEntity> list, String backgroundPath, String outPath,
@@ -738,7 +742,7 @@ public class CreateMap {
      * @param colors   色值
      * @param startLon 图片开始精度
      * @param startLat 图片开始纬度
-     * @return
+     * @return 是否成功
      */
     public static boolean createHeatMap(List<HeatMapEntity> list, String outPath, Double width, Double height,
                                         List<double[]> values, List<Color> colors, int startLon, int startLat) {

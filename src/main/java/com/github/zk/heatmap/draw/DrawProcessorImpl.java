@@ -316,7 +316,7 @@ public class DrawProcessorImpl implements IDrawProcessor {
 
         List<HeatMapEntity> allList = new ArrayList<>();
 
-        for (int i = 0; i < 360 / 5 * 180 / 5; i++) {
+        for (int i = 0; i < (360 / 5) * (180 / 5); i++) {
             // 右下点
             int rightLon = startLon + width;
             int rightLat = startLat - height;
@@ -336,7 +336,7 @@ public class DrawProcessorImpl implements IDrawProcessor {
                 }
                 return false;
             }).collect(Collectors.toList());
-            /*if (collect.size() < 4) {
+            if (collect.size() < 4) {
                 // 下一个矩阵起始点
                 startLon += width;
                 // 如果最后一个点经度为180，需要换行插值
@@ -345,7 +345,7 @@ public class DrawProcessorImpl implements IDrawProcessor {
                     startLat -= height;
                 }
                 continue;
-            }*/
+            }
             List<HeatMapEntity> insertList = insertList(collect, points, width, height);
             // 四角点值插入
             insertList.addAll(collect);
