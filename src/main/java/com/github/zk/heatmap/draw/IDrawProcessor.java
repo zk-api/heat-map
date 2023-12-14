@@ -8,7 +8,6 @@ import java.util.List;
  * 绘制处理
  *
  * @author zk
- * @date 2022/11/10 15:43
  */
 public interface IDrawProcessor {
 
@@ -25,7 +24,8 @@ public interface IDrawProcessor {
      * 绘制带背景图的热力图
      *
      * @param list 数据
-     * @param background 输出路径
+     * @param background 背景图地址
+     * @param outPath 输出路径
      * @return 是否生成成功
      */
     List<Legend> drawImgBackground(List<HeatMapEntity> list, String background, String outPath);

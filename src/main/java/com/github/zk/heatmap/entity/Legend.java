@@ -6,7 +6,6 @@ import java.util.Arrays;
  * 图例
  *
  * @author zk
- * @date 2022/12/14 14:01
  */
 public class Legend {
     /**

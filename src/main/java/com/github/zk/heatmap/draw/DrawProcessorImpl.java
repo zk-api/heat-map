@@ -19,7 +19,6 @@ import javax.swing.*;
  * 绘制处理实现
  *
  * @author zk
- * @date 2022/11/17 9:59
  */
 public class DrawProcessorImpl implements IDrawProcessor {
     /** 像素宽 */

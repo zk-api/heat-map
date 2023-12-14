@@ -16,7 +16,6 @@ import java.util.List;
  * 绘制示例
  *
  * @author zk
- * @date 2022/12/14 9:34
  * @since  2.0
  */
 public class DrawExample {
@@ -63,7 +62,7 @@ public class DrawExample {
     /**
      * 默认设置绘制
      *
-     * @return
+     * @return 图例列表
      */
     public static List<Legend> defaultDraw() {
         IDrawProcessor drawProcessor = new DrawProcessorImpl.DrawProcessorBuilder().build();
