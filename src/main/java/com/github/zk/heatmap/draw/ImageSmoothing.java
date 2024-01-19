@@ -4,7 +4,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import javax.imageio.ImageIO;
@@ -13,7 +12,6 @@ import javax.imageio.ImageIO;
  * 平滑处理
  *
  * @author zk
- * @date 2024/1/18 10:54
  */
 public class ImageSmoothing {
 
