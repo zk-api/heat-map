@@ -21,18 +21,36 @@ import javax.swing.*;
  * @author zk
  */
 public class DrawProcessorImpl implements IDrawProcessor {
-    /** 像素宽 */
+    private final ImageSmoothing imageSmoothing = new ImageSmoothing();
+    /**
+     * 像素宽
+     */
     private BigDecimal width = new BigDecimal("1");
-    /** 像素高 */
+    /**
+     * 像素高
+     */
     private BigDecimal height = new BigDecimal("1");
-    /** 图开始经度 */
+    /**
+     * 图开始经度
+     */
     private Integer startLon = -180;
-    /** 图开始纬度 */
+    /**
+     * 图开始纬度
+     */
     private Integer startLat = 90;
-    /** 颜色范围 */
+    /**
+     * 颜色范围
+     */
     private List<Color> colors = defaultColor();
-    /** 值范围 */
+    /**
+     * 值范围
+     */
     private List<Double[]> values = defaultValue();
+    /** 带背景的滤波半径 */
+    private Integer backgroudRadius = 15;
+
+    /** 无背景的滤波半径 */
+    private Integer noBackgroudRadius = 5;
 
     public BigDecimal getWidth() {
         return width;
@@ -54,7 +72,8 @@ public class DrawProcessorImpl implements IDrawProcessor {
         return colors;
     }
 
-    private DrawProcessorImpl(){}
+    private DrawProcessorImpl() {
+    }
 
     @Override
     public List<Legend> drawImg(List<HeatMapEntity> list, String outPath) {
@@ -108,13 +127,13 @@ public class DrawProcessorImpl implements IDrawProcessor {
                 }
             }
         }
-
+        BufferedImage smoothedImage = imageSmoothing.filter(bi, noBackgroudRadius);
         try {
             Path path = Paths.get(outPath);
             if (!Files.exists(path)) {
                 Files.createDirectories(path.getParent());
             }
-            ImageIO.write(bi, "png", path.toFile());
+            ImageIO.write(smoothedImage, "png", path.toFile());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -176,11 +195,15 @@ public class DrawProcessorImpl implements IDrawProcessor {
                 }
             }
         }
+        // 平滑处理
+        BufferedImage smoothedImage = imageSmoothing.filter(bi, backgroudRadius);
+
         //加载地图
         if (background != null && !"".equals(background)) {
             ImageIcon ii = new ImageIcon(background);
+            Graphics2D graphicsSmooth = smoothedImage.createGraphics();
             //绘制地图
-            graphics.drawImage(ii.getImage(), 0, 0, 3900, 1970, null);
+            graphicsSmooth.drawImage(ii.getImage(), 0, 0, 3900, 1970, null);
         }
 
         try {
@@ -188,7 +211,7 @@ public class DrawProcessorImpl implements IDrawProcessor {
             if (!Files.exists(path)) {
                 Files.createDirectories(path.getParent());
             }
-            ImageIO.write(bi, "png", path.toFile());
+            ImageIO.write(smoothedImage, "png", path.toFile());
         } catch (IOException e) {
             e.printStackTrace();
             return null;
@@ -198,25 +221,53 @@ public class DrawProcessorImpl implements IDrawProcessor {
     }
 
     public static class DrawProcessorBuilder {
-        private DrawProcessorImpl drawProcessor = new DrawProcessorImpl();
+        private final DrawProcessorImpl drawProcessor = new DrawProcessorImpl();
 
+        /**
+         * 构建像素
+         *
+         * @param width  宽
+         * @param height 高
+         * @return DrawProcessorBuilder对象
+         */
         public DrawProcessorBuilder pixel(BigDecimal width, BigDecimal height) {
             drawProcessor.width = width;
             drawProcessor.height = height;
             return this;
         }
 
+        /**
+         * 构建初始化位置
+         *
+         * @param startLon 开始经度
+         * @param startLat 开始纬度
+         * @return DrawProcessorBuilder对象
+         */
         public DrawProcessorBuilder position(Integer startLon, Integer startLat) {
             drawProcessor.startLat = startLat;
             drawProcessor.startLon = startLon;
             return this;
         }
 
+        /**
+         * 构建图例
+         *
+         * @param colors 颜色
+         * @param values 色域
+         * @return DrawProcessorBuilder对象
+         */
         public DrawProcessorBuilder legend(List<Color> colors, List<Double[]> values) {
             drawProcessor.colors = colors;
             drawProcessor.values = values;
             return this;
         }
+
+        public DrawProcessorBuilder radius(Integer backgroudRadius, Integer noBackgroudRadius) {
+            drawProcessor.backgroudRadius = backgroudRadius;
+            drawProcessor.noBackgroudRadius = noBackgroudRadius;
+            return this;
+        }
+
         public DrawProcessorImpl build() {
             return this.drawProcessor;
         }
@@ -315,7 +366,7 @@ public class DrawProcessorImpl implements IDrawProcessor {
 
         List<HeatMapEntity> allList = new ArrayList<>();
 
-        for (int i = 0; i < (360 / 5) * (180 / 5); i++) {
+        for (int i = 0; i < (360 / width) * (180 / height); i++) {
             // 右下点
             int rightLon = startLon + width;
             int rightLat = startLat - height;
@@ -374,7 +425,7 @@ public class DrawProcessorImpl implements IDrawProcessor {
      * @return 插值后集合
      */
     private List<HeatMapEntity> insertList(List<HeatMapEntity> collect, List<int[]> points,
-                                                  int width, int height) {
+                                           int width, int height) {
         double insertInterval = 1;
         List<HeatMapEntity> insertedList = new ArrayList<>();
         // 第一行和最后一行先插值

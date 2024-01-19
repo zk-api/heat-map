@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * 绘制示例
@@ -20,9 +21,7 @@ import java.util.List;
  */
 public class DrawExample {
     public static void main(String[] args) {
-//        defaultDraw();
-        System.out.println(pixelDraw());
-//        defaultBackgroundDraw();
+        System.out.println(defaultBackgroundDraw());
     }
 
     public static List<HeatMapEntity> buildHeatMapEntities(BigDecimal width, BigDecimal height) {
@@ -32,8 +31,8 @@ public class DrawExample {
         }
         List<HeatMapEntity> list = new ArrayList<>();
         Path path = Paths.get("D:\\work\\workspace\\github\\heat-map\\data\\dop.DOP");
-        try {
-            Files.lines(path).skip(1).forEach(s -> {
+        try(Stream<String> lines = Files.lines(path)) {
+            lines.skip(1).forEach(s -> {
                 HeatMapEntity heatMapEntity = new HeatMapEntity();
                 String[] colums = s.split("\\s+");
                 if ("--".equals(colums[4])) {
@@ -54,7 +53,7 @@ public class DrawExample {
                 list.add(heatMapEntity);
             });
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
         return list;
     }
@@ -65,10 +64,12 @@ public class DrawExample {
      * @return 图例列表
      */
     public static List<Legend> defaultDraw() {
-        IDrawProcessor drawProcessor = new DrawProcessorImpl.DrawProcessorBuilder().build();
-        List<HeatMapEntity> heatMapEntities = buildHeatMapEntities(new BigDecimal("1"),
-                new BigDecimal("1"));
-        String filePath = "D:\\work\\workspace\\github\\heat-map\\data\\outpic\\1.png";
+        IDrawProcessor drawProcessor = new DrawProcessorImpl.DrawProcessorBuilder()
+                .pixel(new BigDecimal("5"), new BigDecimal("5"))
+                .build();
+        List<HeatMapEntity> heatMapEntities = buildHeatMapEntities(new BigDecimal("5"),
+                new BigDecimal("5"));
+        String filePath = "D:\\work\\1.png";
         return drawProcessor.drawImg(heatMapEntities, filePath);
     }
 
@@ -89,7 +90,7 @@ public class DrawExample {
                 .build();
         List<HeatMapEntity> heatMapEntities = buildHeatMapEntities(new BigDecimal("1"),
                 new BigDecimal("1"));
-        String filePath = "D:\\work\\workspace\\github\\heat-map\\data\\outpic\\1-3.png";
+        String filePath = "D:\\work\\1-3.png";
         String backgroundPath = "D:\\work\\workspace\\github\\heat-map\\data\\dt-release.png";
         return drawProcessor.drawImgBackground(heatMapEntities, backgroundPath, filePath);
     }
