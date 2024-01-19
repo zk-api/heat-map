@@ -43,7 +43,15 @@
 > 注意：此功能需要根据数据调试色域，才能达到较好效果
 
 ## 二、快速开始
-1. 通过build方式构建参数，代码如下：
+1. 项目添加依赖
+```xml
+<dependency>
+    <groupId>io.github.zk-api</groupId>
+    <artifactId>heat-map</artifactId>
+    <version>1.0.3</version>
+</dependency>
+```
+2. 通过build方式构建参数，代码如下：
 ```java
 IDrawProcessor drawProcessor = new DrawProcessorImpl.DrawProcessorBuilder().build();
 ```
@@ -67,7 +75,7 @@ legend(List<Color> colors, List<Double[]> values);
 radius(Integer backgroudRadius, Integer noBackgroudRadius);
 ```
 
-2. 组装数据并调用接口
+3. 组装数据并调用接口
 
 将数据组装为`List<HeatMapEntity>`格式，调用相应接口生成对应热力图，使用示例如下
 ```java
